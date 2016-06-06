@@ -1,0 +1,47 @@
+{% load crispy_forms_tags %}
+
+<form action="htmlajaxurl" method="post">{% csrf_token %}
+    {% crispy form %}
+{#    <input type="submit" value="Send message"/>#}
+</form>
+
+<form action="htmlajaxurl" method="get">
+    {% crispy reset_form %}
+{#    <input type="submit" value="reset"/>#}
+</form>
+
+
+<ul>
+    <li>
+        <div class="nested">
+            <form class="nested" action="htmlajaxurl" method="get">
+                {% crispy nested_form %}
+{#                <input type="submit" value="nested !"/>#}
+            </form>
+            <div id="deletemeasap"></div>
+
+            <form class="is-hello-me" action="hello" method="get">
+                <input type="submit" value="hello"/>
+
+            </form>
+
+
+        </div>
+        <script>
+                    $(function (){
+                var $thecontainer = $('div#deletemeasap').parents('div.nested').first();
+                $thecontainer.find('#deletemeasap').remove();
+                    var fred=function (event, data){
+                            var $target = $( event.target );
+
+                            if ($target.find('form').length==0){
+                                $target.addClass("red");
+                            };
+                        };
+                 setup_ajax_on($thecontainer, fred );
+                 // or $thecontainer.on('html_changed', fred);
+                });
+            </script>
+    </li>
+</ul>
+

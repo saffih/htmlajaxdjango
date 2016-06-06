@@ -1,0 +1,109 @@
+{% load static from staticfiles %}
+{% load compress %}
+<html>
+<head>
+
+{#    external jquery should be in base tempalte #}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+
+{#    external boostrap should be in base tempalte #}
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+{#    jquery not minified for debug#}
+{#    <script src="https://code.jquery.com/jquery-1.12.2.js"></script>#}
+
+    <script type="text/javascript" src="{% static 'html_ajax.js' %}"></script>
+
+
+{# example of scss on the fly compile / compress #}
+    {% compress css %}
+    <link rel="stylesheet" type="text/x-scss" href="{% static '/css/htmlajax.scss' %}" media="screen"/>
+    {% endcompress %}
+
+    {% compress css %}
+
+    {% endcompress %}
+
+</head>
+
+<body>
+<ul>
+    This page show case html ajax form interaction with the following behaviour:
+    <li>
+        There are two forms in two containers, successful submit would redirect the ajax.
+        Demonstrated by filling the two forms and submitting on of them.
+        a partial submit would not redirect/clear the page but would present an error message.
+        The outer form submit would return a result with url for the browser redirect to.
+
+        A reset button would reload the container only of on of the forms and the nested is a showing nested containers behaviours.
+        The nested forms when submitted are not redirected but present a message.
+
+        Data is retained always except the succesful scenario where the page is presented fresh.
+        Django error handling is showed to be working and a state (if the form is nested) given by the URL initilize a form for later affecting behaviour.
+
+        A hidden contianerhtmlajax is ignore (not ajax when ajax is monitored) and debug information is dumped to the console.
+
+
+        That address the issue of page navigation, component initilization and processing, nesting without collisions, and CSS synergy.
+
+    </li>
+    <li>
+        Submit cause redirect and container gets the result - 302 would cause the page to redirect (refresh since we chose to redirect to the same page).
+        <div class="container" > First container</div>
+    </li>
+        <br/>
+    <li>
+{#    <li style="display:none">#}
+    <div class="container" > second container</div>
+    <li>
+    <br/>
+    Since we required bind to visible containers ('.container:visible') - the hidden container was ignored by specifying style='display:none' (any css selector affecting the element will do)
+    <li style='display:none'>
+
+        <div class="container" > third ignored container</div>
+    </li>
+{#    Container with form which returns no form as result#}
+{#    <li>#}
+{##}
+{#        <div class="container" >#}
+{#            <form action="/" method="get">#}
+{#                <input type="submit" value=""/>#}
+{#            </form>#}
+{#        </div>#}
+{#    </li>#}
+
+</ul>
+
+
+<script type="text/javascript">
+                $(function (){
+    // in our scenario 'form:not(.nested)' is not needed but it is shown for case we want not to bind to some inner form.
+    // '.container' is good enough - though we show that we can have the ajax be responsive based on the CSS show hide
+    setup_ajax_on_url(['htmlajaxurl'], '.container:visible', 'form:not(.nested)',
+            function (event, data) {
+                console.log(JSON.stringify($(this)) + ' ==> ' + JSON.stringify(event) + ' by ' + data);
+                var $target = $( event.target );
+                // show pulling data from the page
+                var $result=$target.find('#result');
+                var result=$result.html();
+                if (result=='success'){
+                    alert('suceess');
+                    // show
+                    var redirectto=$result.data("url");
+                    alert("redirect to: " + redirectto);
+                    window.location.href=redirectto;
+
+                }
+            });
+    // showoff debug
+    $('body').on('form_bound form_posted',
+            function (event, data) {
+                console.log('event = ' + JSON.stringify(event) + ' container = ' + JSON.stringify($(this)) + ' ==> data(form) ' + JSON.stringify(data));
+            });
+                        } );
+
+</script>
+</body>
+</html>
